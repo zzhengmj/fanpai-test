@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>反派人格档案 · 秘密测试</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{
+  --bg:#0a0710;
+  --bg2:#120c1d;
+  --ink:#171020;
+  --card:#1c1328;
+  --card2:#251a36;
+  --line:#342648;
+  --line-hi:#4a3566;
+  --crimson:#b3374d;
+  --crimson-hi:#d84a63;
+  --gold:#d9b45a;
+  --gold-hi:#e8cd82;
+  --gold-dim:#9c7f3f;
+  --text:#f1ecfa;
+  --muted:#a89cbd;
+  --purple:#7b5fb0;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:"Noto Sans SC",system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  color:var(--text);line-height:1.65;background:var(--bg);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background-image:
+    radial-gradient(1200px 800px at 85% -10%, rgba(123,95,176,.16), transparent 60%),
+    radial-gradient(1000px 700px at -10% 20%, rgba(179,55,77,.10), transparent 55%),
+    radial-gradient(900px 900px at 50% 120%, rgba(60,40,90,.18), transparent 60%);
+  background-attachment:fixed;
+}
+.serif{font-family:"Noto Serif SC","Noto Sans SC",serif}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit}
+.hide{display:none!important}
+
+/* ===== 视图容器 ===== */
+.view{
+  min-height:100vh;padding:calc(var(--safe-top) + 22px) 18px calc(var(--safe-bottom) + 30px);
+  max-width:520px;margin:0 auto;display:flex;flex-direction:column;
+  animation:viewIn .5s cubic-bezier(.2,.7,.3,1);
+}
+@keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ===== 通用按钮 ===== */
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:54px;
+  border-radius:16px;font-size:16px;font-weight:700;letter-spacing:2px;position:relative;
+  transition:transform .12s,filter .25s,box-shadow .25s;overflow:hidden}
+.btn:active{transform:scale(.975)}
+.btn-primary{background:linear-gradient(135deg,var(--crimson),#8f2438);color:#fff;
+  box-shadow:0 10px 28px rgba(179,55,77,.4),inset 0 1px 0 rgba(255,255,255,.18)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--line-hi);color:var(--text)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#a9872f);color:#1a1204;
+  box-shadow:0 10px 26px rgba(217,180,90,.28),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-gold:hover{filter:brightness(1.07)}
+
+/* ===== 密码门禁 ===== */
+.login-wrap{flex:1;display:flex;flex-direction:column;justify-content:center}
+.login-brand{text-align:center;margin-bottom:30px}
+.login-brand .mark{width:78px;height:78px;margin:0 auto 18px;border-radius:22px;position:relative;
+  background:radial-gradient(circle at 32% 26%,var(--purple),#241936 72%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 14px 36px rgba(123,95,176,.35),inset 0 0 0 1px rgba(217,180,90,.28)}
+.login-brand h1{font-size:33px;font-weight:900;letter-spacing:5px;color:var(--text)}
+.login-brand h1 .c{color:var(--crimson-hi)}
+.login-brand p{color:var(--muted);font-size:12px;margin-top:10px;letter-spacing:3px;font-weight:300}
+.pwd-ticket{position:relative;background:linear-gradient(150deg,rgba(179,55,77,.14),rgba(123,95,176,.10));
+  border:1px solid var(--line-hi);border-radius:18px;padding:20px 18px 18px;text-align:center;margin-bottom:18px;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.25)}
+.pwd-ticket::before,.pwd-ticket::after{content:"";position:absolute;width:10px;height:10px;border:1px solid var(--gold-dim)}
+.pwd-ticket::before{top:8px;left:8px;border-right:none;border-bottom:none}
+.pwd-ticket::after{bottom:8px;right:8px;border-left:none;border-top:none}
+.pwd-ticket .lbl{font-size:12px;color:var(--gold-dim);letter-spacing:3px;margin-bottom:10px}
+.pwd-ticket .val{font-size:30px;font-weight:900;letter-spacing:9px;color:var(--gold);
+  font-family:"Noto Serif SC",serif;text-shadow:0 0 18px rgba(217,180,90,.35)}
+.pwd-ticket .tip{font-size:11px;color:var(--muted);margin-top:10px;letter-spacing:.5px}
+.field{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px;letter-spacing:1px}
+.field input{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:18px;letter-spacing:3px}
+.field input::placeholder{color:#5c5072;letter-spacing:2px}
+.msg{margin-top:13px;font-size:13px;text-align:center;min-height:20px}
+.msg.err{color:#ec6f86}
+.msg.ok{color:#82d79b}
+.login-hint{margin-top:22px;text-align:center;font-size:12px;color:#6f6286;line-height:1.9}
+.login-hint .btn-regen{display:inline-flex;align-items:center;gap:6px;margin-top:10px;min-height:42px;padding:0 20px;
+  font-size:13px;color:var(--gold);border:1px solid var(--line-hi);border-radius:30px;background:var(--card)}
+
+/* ===== 开始页 ===== */
+.hero{position:relative;border-radius:24px;overflow:hidden;height:300px;margin-bottom:20px;
+  box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.hero .veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,7,16,.95) 4%,rgba(10,7,16,.25) 45%,rgba(10,7,16,.1) 100%)}
+.hero .seal{position:absolute;right:14px;top:14px;width:46px;height:46px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:rgba(179,55,77,.28);
+  border:1px solid rgba(217,180,90,.45);backdrop-filter:blur(2px)}
+.hero .tag{position:absolute;left:16px;bottom:14px;font-size:12px;color:var(--gold);letter-spacing:2px;
+  background:rgba(10,7,16,.6);padding:5px 12px;border-radius:20px;border:1px solid rgba(217,180,90,.3)}
+.intro-card{background:linear-gradient(160deg,var(--card),var(--ink));border:1px solid var(--line);
+  border-radius:22px;padding:24px 22px;margin-bottom:18px;box-shadow:0 14px 40px rgba(0,0,0,.35)}
+.intro-card h2{font-size:21px;font-weight:800;margin-bottom:14px;letter-spacing:1px}
+.intro-card h2 .dot{color:var(--crimson-hi)}
+.intro-card p{color:var(--muted);font-size:14px;margin-bottom:8px}
+.intro-list{margin:16px 0 8px}
+.intro-list .row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.intro-list .row:last-child{border-bottom:none}
+.intro-list .idx{flex:none;width:28px;height:28px;border-radius:9px;background:var(--card2);border:1px solid var(--line-hi);
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--gold);font-weight:700}
+.intro-list .row span{color:var(--text)}
+.note{margin-top:16px;font-size:12px;color:#6f6286;text-align:center;letter-spacing:.5px}
+
+/* ===== 答题页 ===== */
+.quiz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.quiz-head .back{width:44px;height:44px;border-radius:13px;background:var(--card);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.quiz-head .back:active{transform:scale(.93)}
+.quiz-head .count{font-size:14px;color:var(--muted)}
+.quiz-head .count b{color:var(--gold);font-size:19px;font-weight:800}
+.progress{height:7px;background:var(--card2);border-radius:20px;overflow:hidden;margin-bottom:24px}
+.progress .bar{height:100%;background:linear-gradient(90deg,var(--crimson),var(--purple),var(--gold));
+  border-radius:20px;transition:width .35s ease}
+.q-card{background:linear-gradient(160deg,var(--card),var(--ink));border:1px solid var(--line);
+  border-radius:22px;padding:26px 20px;box-shadow:0 14px 40px rgba(0,0,0,.35)}
+.q-dim{display:inline-block;font-size:12px;color:var(--gold-dim);border:1px solid rgba(217,180,90,.35);
+  padding:3px 13px;border-radius:20px;margin-bottom:16px;letter-spacing:1px}
+.q-title{font-size:18px;font-weight:700;line-height:1.75;margin-bottom:22px}
+.q-opts{display:flex;flex-direction:column;gap:11px}
+.opt{width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:15px;
+  padding:14px 15px;font-size:14px;color:var(--text);display:flex;gap:11px;align-items:flex-start;
+  transition:border-color .2s,background .2s,transform .1s}
+.opt:active{transform:scale(.985)}
+.opt .key{flex:none;width:25px;height:25px;border-radius:8px;background:var(--card);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);margin-top:1px;transition:all .2s}
+.opt.selected{border-color:var(--crimson-hi);background:linear-gradient(135deg,rgba(179,55,77,.18),rgba(123,95,176,.12))}
+.opt.selected .key{background:var(--crimson);border-color:var(--crimson);color:#fff}
+.quiz-nav{display:flex;gap:12px;margin-top:22px}
+.quiz-nav .btn{flex:1}
+
+/* ===== 结果页 ===== */
+.result-top{position:relative;text-align:center;padding:28px 16px 24px;
+  background:linear-gradient(165deg,var(--card2),var(--ink));border:1px solid var(--line-hi);
+  border-radius:24px;margin-bottom:16px;overflow:hidden;
+  box-shadow:0 16px 46px rgba(0,0,0,.4)}
+.result-top::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(300px 160px at 50% -20%, rgba(217,180,90,.16), transparent 70%)}
+.result-top .fileno{font-size:11px;color:var(--gold-dim);letter-spacing:3px;margin-bottom:6px}
+.result-top .lbl{font-size:12px;color:var(--muted);letter-spacing:3px;margin-bottom:12px}
+.result-top h2{font-size:28px;font-weight:900;color:var(--crimson-hi);margin-bottom:14px;letter-spacing:1px;
+  text-shadow:0 0 22px rgba(216,74,99,.25)}
+.result-top .quote{font-size:15px;color:var(--gold);font-style:italic;line-height:1.85;padding:0 6px}
+.result-top .score-pill{display:inline-block;margin-top:16px;font-size:13px;color:#fff;
+  background:linear-gradient(135deg,var(--crimson),#8f2438);padding:6px 18px;border-radius:22px;letter-spacing:1px;
+  box-shadow:0 6px 18px rgba(179,55,77,.4)}
+.panel{background:linear-gradient(160deg,var(--card),var(--ink));border:1px solid var(--line);
+  border-radius:22px;padding:22px;margin-bottom:16px;box-shadow:0 14px 40px rgba(0,0,0,.32)}
+.panel h3{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:9px;letter-spacing:.5px}
+.panel h3 .sq{width:9px;height:19px;border-radius:3px;background:linear-gradient(var(--crimson),var(--purple))}
+.radar-wrap{display:flex;justify-content:center}
+.radar-wrap svg{max-width:320px}
+.analysis p{font-size:14px;color:#dcd2e8;margin-bottom:12px;line-height:1.95}
+.analysis .th{font-size:13px;color:var(--gold);font-weight:600;margin:15px 0 7px;letter-spacing:1.5px;display:flex;align-items:center;gap:8px}
+.analysis .th::before{content:"";width:16px;height:1px;background:var(--gold-dim)}
+.analysis .tag-list{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
+.analysis .tag{font-size:12px;padding:5px 14px;border-radius:18px;background:var(--card2);
+  border:1px solid var(--line-hi);color:var(--text)}
+.result-actions{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.result-actions .btn-row{display:flex;gap:12px}
+.result-actions .btn-row .btn{flex:1}
+
+/* ===== 弹窗 ===== */
+.modal-mask{position:fixed;inset:0;background:rgba(5,3,10,.78);backdrop-filter:blur(5px);
+  display:flex;align-items:center;justify-content:center;padding:22px;z-index:50;animation:fadeIn .25s ease}
+.modal{background:linear-gradient(165deg,var(--card),var(--ink));border:1px solid var(--line-hi);
+  border-radius:24px;max-width:400px;width:100%;padding:26px 22px;animation:pop .32s cubic-bezier(.2,.8,.3,1.2);
+  box-shadow:0 24px 70px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04)}
+@keyframes pop{from{transform:scale(.9) translateY(10px);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal .m-title{font-size:20px;font-weight:800;text-align:center;margin-bottom:18px;letter-spacing:1px}
+.modal .m-body{font-size:14px;color:var(--text);line-height:2;text-align:center}
+.modal .m-body .hi{color:var(--gold);font-weight:700}
+.modal .m-body .step{display:block;color:var(--muted);font-size:13px;margin-top:10px;text-align:left}
+.modal .m-body .step b{color:var(--crimson-hi)}
+.modal-actions{display:flex;flex-direction:column;gap:11px;margin-top:20px}
+.modal-actions .btn-row{display:flex;gap:11px}
+.modal-actions .btn-row .btn{flex:1}
+
+/* ===== 保存长图预览 ===== */
+.share-img-box{background:#0a0710;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:12px 0;
+  max-height:420px;overflow-y:auto}
+.share-img-box img{width:100%;display:block}
+
+@media (max-width:768px){
+  .view{padding-left:14px;padding-right:14px}
+  .hero{height:270px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 视图：密码门禁 ===== -->
+<section id="view-login" class="view">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#d9b45a" stroke-width="1.5"><path d="M12 3l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 8.3l5-.7z"/><path d="M12 16v5" stroke="#b3374d"/></svg>
+      </div>
+      <h1>反派人格<span class="c">档案</span></h1>
+      <p>CONFIDENTIAL · 黑暗侧人格检测</p>
+    </div>
+    <div class="pwd-ticket">
+      <div class="lbl">本次访问密钥</div>
+      <div class="val" id="gen-pwd">------</div>
+      <div class="tip">每枚密钥限用 3 次 · 用完请生成新密钥</div>
+    </div>
+    <div class="field">
+      <label for="pwd-input">输入上方密钥</label>
+      <input type="text" id="pwd-input" placeholder="请输入访问密钥" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" id="btn-unlock">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      解锁档案
+    </button>
+    <div class="msg" id="login-msg"></div>
+    <div class="login-hint">
+      想要新的密钥？
+      <button class="btn-regen" id="btn-regen">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        重新生成
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 视图：开始页 ===== -->
+<section id="view-intro" class="view hide">
+  <div class="hero">
+    <img src="https://aka.doubaocdn.com/s/4Z78lKOhti" alt="反派人格封面">
+    <div class="veil"></div>
+    <div class="seal">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#d9b45a" stroke-width="1.5"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z"/></svg>
+    </div>
+    <div class="tag">CONFIDENTIAL · 加密卷宗</div>
+  </div>
+  <div class="intro-card">
+    <h2>测一测<span class="dot">.</span>你的反派人格</h2>
+    <p>每个人的内心都住着一个「反派」。你不必真的作恶，但总有一种暗黑面主导着你的处事方式、欲望与底线。本测试基于人格心理学的黑暗三角与攻击行为理论，为你建立专属的黑暗侧档案。</p>
+    <div class="intro-list">
+      <div class="row"><div class="idx">30</div><span>道真实又带梗的情境题</span></div>
+      <div class="row"><div class="idx">6</div><span>个黑暗特质维度</span></div>
+      <div class="row"><div class="idx">6</div><span>类反派人格，建立你的专属档案</span></div>
+      <div class="row"><div class="idx">1</div><span>张可保存、可分享的档案长图</span></div>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="btn-start">
+    开始测试
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>
+  <div class="note">测试结果仅供娱乐参考 · 约需 3 分钟</div>
+</section>
+
+<!-- ===== 视图：答题页 ===== -->
+<section id="view-quiz" class="view hide">
+  <div class="quiz-head">
+    <button class="back" id="btn-prev" aria-label="上一题">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    </button>
+    <div class="count"><b id="q-cur">1</b> / <span id="q-total">30</span></div>
+    <div style="width:44px"></div>
+  </div>
+  <div class="progress"><div class="bar" id="q-bar" style="width:0%"></div></div>
+  <div class="q-card">
+    <span class="q-dim" id="q-dim"></span>
+    <div class="q-title" id="q-title"></div>
+    <div class="q-opts" id="q-opts"></div>
+    <div class="quiz-nav">
+      <button class="btn btn-ghost" id="btn-prev2">上一题</button>
+      <button class="btn btn-primary" id="btn-next" disabled>下一题</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 视图：结果页 ===== -->
+<section id="view-result" class="view hide">
+  <div class="result-top">
+    <div class="fileno" id="r-fileno"></div>
+    <div class="lbl">YOUR HIDDEN PERSONA</div>
+    <h2 id="r-name"></h2>
+    <div class="quote" id="r-quote"></div>
+    <div class="score-pill" id="r-pill"></div>
+  </div>
+
+  <div class="panel">
+    <h3><span class="sq"></span>黑暗特质雷达</h3>
+    <div class="radar-wrap" id="radar-svg"></div>
+  </div>
+
+  <div class="panel analysis">
+    <h3><span class="sq"></span>档案分析</h3>
+    <div id="r-analysis"></div>
+  </div>
+
+  <div class="panel">
+    <h3><span class="sq"></span>行动与转化</h3>
+    <p style="font-size:14px;color:#dcd2e8;line-height:1.95" id="r-growth"></p>
+  </div>
+
+  <div class="result-actions">
+    <button class="btn btn-gold" id="btn-save">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+      保存档案长图
+    </button>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="btn-copy">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        复制结果链接
+      </button>
+      <button class="btn btn-ghost" id="btn-again">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        再测一次
+      </button>
+    </div>
+    <button class="btn btn-ghost" id="btn-review">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17l-6.1 3.6 1.4-6.8L2.2 9.1l6.9-.8z"/></svg>
+      好评有礼 · 领 1 元返现
+    </button>
+  </div>
+</section>
+
+<!-- ===== 弹窗：好评有礼 ===== -->
+<div id="modal-review" class="modal-mask hide">
+  <div class="modal">
+    <div class="m-title">好评有礼</div>
+    <div class="m-body">
+      <div class="hi">店铺好评后，即可领取 1 元返现</div>
+      <span class="step"><b>①</b> 在店铺对本次服务给出五星好评</span>
+      <span class="step"><b>②</b> 将好评截图发送给客服</span>
+      <span class="step"><b>③</b> 客服核对后，返还 1 元现金</span>
+      <div style="margin-top:14px;font-size:12px;color:var(--muted)">客服工作时间 9:00 - 21:00</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-review-close">我知道了</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 弹窗：保存长图 ===== -->
+<div id="modal-share" class="modal-mask hide">
+  <div class="modal" style="max-width:400px">
+    <div class="m-title">保存档案</div>
+    <div class="share-img-box" id="share-img-box"></div>
+    <div class="m-body" id="share-hint" style="font-size:12px;color:var(--muted)">请选择下方方式保存或分享你的反派档案</div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" id="btn-download-img">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        下载图片
+      </button>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="btn-copy-img">复制图片</button>
+        <button class="btn btn-ghost" id="btn-open-img">打开原图</button>
+      </div>
+      <button class="btn btn-ghost" id="btn-share-close">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   数据：维度 + 30 题 + 6 类结果
+   ============================================================ */
+var DIMS = [
+  {key:'scheme', name:'权谋算计度'},
+  {key:'ego',     name:'自我中心度'},
+  {key:'cold',    name:'情感冷漠度'},
+  {key:'revenge', name:'报复攻击性'},
+  {key:'ethic',   name:'底线灵活度'},
+  {key:'mask',    name:'伪装表演度'}
+];
+var DIM_KEYS = DIMS.map(function(d){return d.key});
+
+var QUESTIONS = [
+  /* 权谋算计度 */
+  {dim:'scheme', t:'公司内斗，有人想拉你结盟搞掉竞争对手，你会？', o:['直接拒绝，专心做事','觉得太累，不掺和','嘴上应着，心里盘算','这是机会，正好借力打力']},
+  {dim:'scheme', t:'你发现同事在偷懒摸鱼还抢功劳，最可能的做法是？', o:['默默忍了，做好自己','提醒他别太过分','先收集证据，等待时机','哪天需要了，这就是我的牌']},
+  {dim:'scheme', t:'想请一个难搞的人帮忙，你的第一反应是？', o:['直接说，被拒就算','客客气气开口','先了解他喜欢什么再开口','先帮他一个忙，欠我人情再说']},
+  {dim:'scheme', t:'领导问你同事的能力如何，你会怎么评价？', o:['实话实说','客观点评','说点好的不得罪人','点到为止，顺便提提他的短板']},
+  {dim:'scheme', t:'一场谈判，对方占了上风，你会？', o:['当场摊牌硬刚','见好就收','先稳住，留到下次谈','先示弱，转头去挖他的底牌']},
+  /* 自我中心度 */
+  {dim:'ego', t:'闺蜜追星花大几万，你觉得？', o:['她开心就好','有点费钱但尊重','不懂，但关我屁事','浪费，我花钱更明智']},
+  {dim:'ego', t:'朋友的建议和你的想法冲突，你通常？', o:['认真参考','会考虑一下','礼貌点头，照旧','他懂什么，我心里有数']},
+  {dim:'ego', t:'别人夸你时，你心里多半是？', o:['谢谢，开心','有点不好意思','还行吧，正常发挥','算他有眼光']},
+  {dim:'ego', t:'看到同龄人买房买车晒朋友圈，你的第一反应？', o:['真心祝福','有点羡慕','挺好的但跟我无关','就这？我迟早甩他十条街']},
+  {dim:'ego', t:'有人当面说你"想太多了"，你会？', o:['想想是不是真的','有点在意','一笑而过','是他层次不够，看不懂我']},
+  /* 情感冷漠度 */
+  {dim:'cold', t:'朋友深夜emo找你哭诉，你内心真正想的是？', o:['心疼，想陪他','认真安慰他','有点累但会陪','他能有什么大事，安慰两句得了']},
+  {dim:'cold', t:'看到"流浪狗被淋湿"的视频，你会？', o:['很难受','心疼，但很快翻篇','有点触动','划走，无感']},
+  {dim:'cold', t:'家人住院，你心里的第一反应更接近？', o:['心揪着，想马上照顾','会担心但先忙手头事','需要时我会在','先搞清楚要花多少钱、耽误多久']},
+  {dim:'cold', t:'同事被领导当众骂哭，你会？', o:['替他难受，想去安慰','觉得尴尬','装作没看见','关我屁事，别连累我就行']},
+  {dim:'cold', t:'朋友反复跟你说同一个感情困扰，你会？', o:['每次都认真听','耐心但不耐烦了','敷衍几句','都说了八百遍，自己不改变']},
+  /* 报复攻击性 */
+  {dim:'revenge', t:'被人背后造谣，你查到是谁了，你会？', o:['不想理，清者自清','找人问清楚','当面警告他','搜集证据，让他当众社死']},
+  {dim:'revenge', t:'有人抢了你升职的机会，你会？', o:['算了，下次再来','心里不爽几天','找机会和领导谈谈','记下了，来日方长']},
+  {dim:'revenge', t:'被人在群里当众阴阳怪气，你会？', o:['当没看见','回怼回去','拉黑算了','截图留证，将来一起算']},
+  {dim:'revenge', t:'前任无缝衔接还晒幸福，你？', o:['真心祝他好','有点不爽但放下','屏蔽他','祝他哪天摔个跟头']},
+  {dim:'revenge', t:'你奉行的原则更接近？', o:['以和为贵','尽量不树敌','人不犯我我不犯人','惹我的人，别想好过']},
+  /* 底线灵活度 */
+  {dim:'ethic', t:'领导让你"灵活处理"一份数据，说会给你奖金，你会？', o:['坚决不做','很为难','说考虑考虑','看给多少，价高就做']},
+  {dim:'ethic', t:'考试时你能抄到稳过的答案，你会？', o:['绝对不抄','犹豫但可能不抄','偷偷瞄几眼','不抄是傻子，过了最重要']},
+  {dim:'ethic', t:'朋友想让你帮忙向别人撒个小谎，你会？', o:['拒绝，不行就明说','看情况帮不帮','能帮就帮，无伤大雅','小忙而已，顺手的事']},
+  {dim:'ethic', t:'有张"太划算"的便宜你明知有猫腻，你会？', o:['碰都不碰','警惕，不去碰','纠结一下','先占了再说，出问题再说']},
+  {dim:'ethic', t:'为了拿到心仪的工作，简历你会？', o:['完全真实','真实但有取舍','适度美化','该夸张就夸张，进了再说']},
+  /* 伪装表演度 */
+  {dim:'mask', t:'心里讨厌一个人，见面时你会？', o:['藏不住，写在脸上','尽量客气','能正常交流','热情到让他觉得我是他知己']},
+  {dim:'mask', t:'有人问你"是不是不高兴"，你会？', o:['直接说','看情况','说没事','立刻切换一张笑脸说：哪有']},
+  {dim:'mask', t:'你能在不同场合自如切换人设吗？', o:['我就是我','会调整一点','比较自如','见人说人话，见鬼说鬼话']},
+  {dim:'mask', t:'最符合你的是哪句？', o:['我表里如一','我偶尔装一下','我挺会装的','你看到的我，可能只是我想让你看到的']},
+  {dim:'mask', t:'发朋友圈前，你会？', o:['想发就发','稍微选一下','会精心包装','只发能立人设的，展现完美生活']}
+];
+
+var RESULT_TYPES = [
+  {
+    id:'schemer', name:'腹黑权谋家', code:'AR-001',
+    profile:'幕后执棋型反派',
+    quote:'「别和我玩手段，我玩手段的时候，你还在讲对错。」',
+    pill:'掌局 · 谋略型反派',
+    radar:[92,65,55,55,70,88],
+    analysis:[
+      {th:'核心画像', txt:'你是典型的「幕后执棋型」反派。不喜正面冲突，习惯躲在暗处掌控全局。你心思缜密，深谙人性，擅长借势借力，往往不动声色便已达成目的。旁人看你温和低调，其实你早已把每一步的利弊算得清清楚楚。'},
+      {th:'心理学依据', txt:'对应「高马基雅维利主义 + 高自我监控」。马基雅维利主义的核心是目标优先、策略灵活，不受单一道德束缚；高自我监控让你擅长依环境调整伪装，是天生的布局者。'},
+      {th:'反派名场面', txt:'被对手当众刁难时笑着打圆场，转头便布好局，三个月后让对方连怎么输的都不知道。'},
+      {th:'人格标签', tags:['深谋远虑','擅长借势','喜怒不形于色','以柔克刚']}
+    ],
+    growth:'你的谋略与洞察力用在正途，会是非常优秀的领导者或决策者。真正的强大不在于算计别人，而在于既能看清全局、又守住内心的光明面。偶尔放下一分算计，会让你赢得更真诚的伙伴。'
+  },
+  {
+    id:'paranoid', name:'疯批偏执者', code:'AR-002',
+    profile:'极端爱恨型反派',
+    quote:'「我可以笑着讲道理，也可以翻脸讲规矩。」',
+    pill:'极致 · 危险型反派',
+    radar:[55,90,75,95,80,45],
+    analysis:[
+      {th:'核心画像', txt:'你是自带张力的「疯批型」反派，爱恨都走极端。平时可能看似正常，但一旦被触碰底线、遭遇背叛，就会变得不计后果、睚眦必报。你不在乎代价，只在乎能不能让对方付出代价。'},
+      {th:'心理学依据', txt:'对应「高自恋 + 高主动攻击倾向 + 低特质共情」。自恋让你无法忍受被轻视与被背叛；低共情使你在反击时不会心软；极端的情绪张力，就是大众口中的「疯批感」——清醒地沉沦，理智地疯狂。'},
+      {th:'反派名场面', txt:'被挚爱背叛后，宁可玉石俱焚，也要拉着对方一起坠入深渊。'},
+      {th:'人格标签', tags:['爱憎分明','敢爱敢恨','不按常理出牌','极致主义']}
+    ],
+    growth:'你的极致与果决是保护自己的铠甲，但别让报复欲反噬你自己。愤怒是最锋利的刀，伤人也会割手。学会把那股狠劲对准目标而非情绪，你本可以用它成就非凡之事。'
+  },
+  {
+    id:'whiteblack', name:'白切黑伪善者', code:'AR-003',
+    profile:'温柔刀型反派',
+    quote:'「我脾气很好，但不代表我没有棱角。」',
+    pill:'伪装 · 温柔刀型反派',
+    radar:[80,55,55,40,60,95],
+    analysis:[
+      {th:'核心画像', txt:'你是最有迷惑性的「温柔刀型」反派。表面温柔无害、善解人意，实则心思深沉、步步为营。别人都觉得你是好人、是知心人，直到被你卖了还在帮你数钱。你擅长用善意当武器，用共情当手段，刀藏在温柔里，伤人于无形。'},
+      {th:'心理学依据', txt:'对应「高马基雅维利主义 + 高印象管理 + 被动攻击」。与直接攻击不同，你更习惯用隐蔽方式达成目的，用友善外壳包裹利己内核，是典型的「非对抗性攻击」，杀伤力藏在看不见的地方。'},
+      {th:'反派名场面', txt:'笑着安慰被排挤的同事，转头就把对方的把柄散播出去，还能收获所有人的好感。'},
+      {th:'人格标签', tags:['善解人意','笑里藏刀','高情商','隐忍腹黑']}
+    ],
+    growth:'你的共情力与情商是罕见的天赋，用在真诚的关系里能收获许多真心。但把所有人都当棋子，最后只会剩下自己。试着把温柔留给值得的人，把手段用在真正该用的地方。'
+  },
+  {
+    id:'aloof', name:'冷漠旁观者', code:'AR-004',
+    profile:'疏离型反派',
+    quote:'「我不害人，但也没人能道德绑架我。」',
+    pill:'凉薄 · 疏离型反派',
+    radar:[55,70,92,55,55,50],
+    analysis:[
+      {th:'核心画像', txt:'你是「事不关己」型反派。不主动害人，但也绝不是圣母。你对他人的痛苦缺乏兴趣，对世俗道德规训不屑一顾。谁都别来打扰你，谁要惹到你，你也会毫不留情地推开。你没什么作恶的欲望，只是天生凉薄，懒得共情。'},
+      {th:'心理学依据', txt:'对应「低共情特质 + 疏离型人格倾向」。你的情感阈值很高，很难被外界牵动情绪，对他人悲欢有很强的隔离感。你不是故意坏，只是天生对别人的事没感觉，对道德绑架天生免疫。'},
+      {th:'反派名场面', txt:'看着身边人勾心斗角，你全程冷眼旁观；有人想拉你下水，你随手就把对方的路堵死了。'},
+      {th:'人格标签', tags:['冷静理性','生人勿近','边界感强','不被情绪绑架']}
+    ],
+    growth:'你的独立与清醒很难得。冷漠是一种保护色，让你不被情绪消耗。但偶尔对身边真正在意你的人柔软一点，不必一直竖起高墙。适度的温暖，不会削弱你的强大。'
+  },
+  {
+    id:'avenger', name:'美强惨复仇者', code:'AR-005',
+    profile:'黑化型反派',
+    quote:'「我本想做个好人，是你们教我做反派的。」',
+    pill:'觉醒 · 复仇型反派',
+    radar:[60,40,50,90,65,60],
+    analysis:[
+      {th:'核心画像', txt:'你不是天生的反派，而是被逼出来的复仇者。曾经你也真诚待人、毫无防备，直到遭遇背叛与伤害后彻底黑化。你做的一切都是为了讨回公道，不是为伤害无辜，但也绝不会放过仇人。你的破碎感与坚韧，是最典型的美强惨特质。'},
+      {th:'心理学依据', txt:'对应「创伤后敌意归因偏差 + 反应性攻击」。你不是天生冷漠，而是过往伤害让你建立了「别人都会伤害我」的认知。反击是你的防御机制，是用坚硬外壳保护曾经柔软的自己。你的坏有迹可循，你的狠都有来由。'},
+      {th:'反派名场面', txt:'经历众叛亲离后涅槃归来，一步步让曾经伤害你的人一一付出代价。'},
+      {th:'人格标签', tags:['隐忍坚韧','涅槃重生','重情重义','恩怨分明']}
+    ],
+    growth:'复仇可以是动力，但别让它成为你人生的全部。惩罚完伤害你的人，就往前走吧。你值得新的生活，而不是永远活在旧伤的阴影里。放下的那一刻，你才真正赢了一次。'
+  },
+  {
+    id:'ambition', name:'纯粹野心家', code:'AR-006',
+    profile:'利益至上型反派',
+    quote:'「我来这世上，是为了登顶，不是来演好人的。」',
+    pill:'野心 · 事业型反派',
+    radar:[80,92,55,55,90,65],
+    analysis:[
+      {th:'核心画像', txt:'你是目标导向的「事业型反派」。没有那么多爱恨情仇，一切以利益和目标为核心。为了往上爬、为了达成野心，你可以灵活调整底线，也可以暂时低头。你不针对任何人，只是挡你路的人，都会被毫不犹豫地挪开。'},
+      {th:'心理学依据', txt:'对应「高自恋 + 高道德推脱 + 高成就动机」。自恋让你相信自己配得上更高的位置；道德推脱让你在牺牲他人利益时没有心理负担；强烈的成就动机是你一切行为的核心动力。你不讲对错，只讲利弊。'},
+      {th:'反派名场面', txt:'为了拿下核心项目，可以笑着和曾经的对手合作，也可以毫不犹豫地牺牲无关紧要的棋子。'},
+      {th:'人格标签', tags:['目标明确','行动力强','利益导向','杀伐果断']}
+    ],
+    growth:'你的野心与执行力会带你走得很远。但别走得太快，弄丢了身边真正重要的人。真正的登顶，往往需要可信赖的同路人。把野心用来成就一番事业，而不是踩踏每一个对手。'
+  }
+];
+
+/* ============================================================
+   密码随机生成 + 门禁
+   ============================================================ */
+var MAX_USES = 3;
+var CHARSET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function genPassword(){
+  var p='';
+  for(var i=0;i<6;i++){ p += CHARSET.charAt(Math.floor(Math.random()*CHARSET.length)); }
+  return p;
+}
+function pwdKey(p){ return 'fp_uses_' + p; }
+function initPwd(){
+  var pwd = genPassword();
+  document.getElementById('gen-pwd').textContent = pwd;
+  return pwd;
+}
+
+/* ============================================================
+   状态
+   ============================================================ */
+var state = {
+  answers: [], current: 0,
+  lastType: null, lastTypeIndex: 0, lastRadar: null
+};
+
+/* ============================================================
+   视图切换（hash 路由）
+   ============================================================ */
+var VIEWS = ['login','intro','quiz','result'];
+function showView(name){
+  VIEWS.forEach(function(v){
+    document.getElementById('view-'+v).classList.toggle('hide', v!==name);
+  });
+  window.scrollTo(0,0);
+  if(name==='result') renderResult();
+}
+function route(){
+  var h = location.hash || '#login';
+  var name = h.replace('#','').split('?')[0];
+  if(VIEWS.indexOf(name)===-1) name='login';
+  if(name==='share'){
+    var params = new URLSearchParams((location.hash.split('?')[1]||''));
+    var idx = Number(params.get('t'));
+    if(RESULT_TYPES[idx]){
+      state.lastTypeIndex = idx;
+      state.lastType = RESULT_TYPES[idx];
+      var rr = params.get('r')||'';
+      state.lastRadar = rr ? rr.split(',').map(Number) : RESULT_TYPES[idx].radar.slice();
+      showView('result');
+    } else { showView('login'); }
+    return;
+  }
+  showView(name);
+}
+window.addEventListener('hashchange', route);
+
+/* ============================================================
+   密码解锁
+   ============================================================ */
+document.getElementById('btn-unlock').addEventListener('click', unlock);
+document.getElementById('pwd-input').addEventListener('keydown', function(e){
+  if(e.key==='Enter') unlock();
+});
+document.getElementById('btn-regen').addEventListener('click', function(){
+  var pwd = initPwd();
+  flash('已生成新密钥：' + pwd, 'ok');
+  document.getElementById('pwd-input').value = '';
+});
+function unlock(){
+  var val = document.getElementById('pwd-input').value.trim().toUpperCase();
+  var msg = document.getElementById('login-msg');
+  if(!val){ msg.className='msg err'; msg.textContent='请输入访问密钥'; return; }
+  var key = pwdKey(val);
+  var uses = parseInt(localStorage.getItem(key)||'0',10);
+  if(uses >= MAX_USES){
+    msg.className='msg err';
+    msg.textContent='该密钥已达使用次数上限（3次），请点击下方重新生成';
+    return;
+  }
+  localStorage.setItem(key, String(uses+1));
+  msg.className='msg ok';
+  msg.textContent='密钥验证通过，正在解密…';
+  location.hash = '#intro';
+}
+
+/* ============================================================
+   答题逻辑
+   ============================================================ */
+function startQuiz(){
+  state.answers = new Array(QUESTIONS.length).fill(-1);
+  state.current = 0;
+  renderQuestion();
+  showView('quiz');
+}
+document.getElementById('btn-start').addEventListener('click', function(){ startQuiz(); });
+
+function renderQuestion(){
+  var i = state.current, q = QUESTIONS[i];
+  document.getElementById('q-cur').textContent = i+1;
+  document.getElementById('q-total').textContent = QUESTIONS.length;
+  document.getElementById('q-bar').style.width = ((i)/QUESTIONS.length*100)+'%';
+  var dimName='';
+  DIMS.forEach(function(d){ if(d.key===q.dim) dimName=d.name; });
+  document.getElementById('q-dim').textContent = dimName;
+  document.getElementById('q-title').textContent = q.t;
+  var wrap = document.getElementById('q-opts');
+  wrap.innerHTML = '';
+  var keys = ['A','B','C','D'];
+  q.o.forEach(function(opt, idx){
+    var btn = document.createElement('button');
+    btn.className = 'opt' + (state.answers[i]===idx ? ' selected':'');
+    btn.innerHTML = '<span class="key">'+keys[idx]+'</span><span>'+opt+'</span>';
+    btn.addEventListener('click', function(){
+      state.answers[i] = idx;
+      renderQuestion();
+      updateNext();
+    });
+    wrap.appendChild(btn);
+  });
+  updateNav();
+}
+function updateNext(){
+  document.getElementById('btn-next').disabled = (state.answers[state.current]===-1);
+}
+function updateNav(){
+  document.getElementById('btn-prev').classList.toggle('hide', state.current===0);
+  document.getElementById('btn-prev2').classList.toggle('hide', state.current===0);
+  document.getElementById('btn-next').textContent = (state.current===QUESTIONS.length-1) ? '查看档案' : '下一题';
+}
+function goNext(){
+  if(state.current < QUESTIONS.length-1){ state.current++; renderQuestion(); }
+  else { computeResult(); }
+}
+function goPrev(){
+  if(state.current > 0){ state.current--; renderQuestion(); }
+}
+document.getElementById('btn-next').addEventListener('click', goNext);
+document.getElementById('btn-prev').addEventListener('click', goPrev);
+document.getElementById('btn-prev2').addEventListener('click', goPrev);
+
+/* ============================================================
+   计分 + 结果判定
+   ============================================================ */
+function computeResult(){
+  var scores = {};
+  DIM_KEYS.forEach(function(k){ scores[k]=0; });
+  QUESTIONS.forEach(function(q, idx){
+    var a = state.answers[idx];
+    if(a<0) return;
+    scores[q.dim] += (a+1);
+  });
+  var radar = DIM_KEYS.map(function(k){ return Math.round((scores[k]-5)/15*100); });
+  state.lastRadar = radar;
+  var best=0, bestDist=Infinity;
+  RESULT_TYPES.forEach(function(rt, i){
+    var d=0;
+    for(var v=0; v<6; v++){ d += Math.pow(radar[v]-rt.radar[v],2); }
+    d = Math.sqrt(d);
+    if(d < bestDist){ bestDist=d; best=i; }
+  });
+  state.lastType = RESULT_TYPES[best];
+  state.lastTypeIndex = best;
+  showView('result');
+  renderResult();
+  try { history.replaceState(null, '', '#share?t='+best+'&r='+radar.join(',')); }
+  catch(e){ location.hash = '#share?t='+best+'&r='+radar.join(','); }
+}
+
+/* ============================================================
+   结果页渲染（SVG 雷达图，零外部依赖）
+   ============================================================ */
+function renderResult(){
+  var t = state.lastType;
+  if(!t) return;
+  document.getElementById('r-fileno').textContent = 'FILE NO. ' + t.code;
+  document.getElementById('r-name').textContent = t.name;
+  document.getElementById('r-quote').textContent = t.quote;
+  document.getElementById('r-pill').textContent = t.pill;
+
+  var an = document.getElementById('r-analysis');
+  an.innerHTML = '';
+  t.analysis.forEach(function(blk){
+    var th = document.createElement('div'); th.className='th'; th.textContent = blk.th;
+    an.appendChild(th);
+    var p = document.createElement('p'); p.textContent = blk.txt; an.appendChild(p);
+    if(blk.tags){
+      var tagWrap = document.createElement('div'); tagWrap.className='tag-list';
+      blk.tags.forEach(function(tag){
+        var s = document.createElement('span'); s.className='tag'; s.textContent=tag; tagWrap.appendChild(s);
+      });
+      an.appendChild(tagWrap);
+    }
+  });
+  document.getElementById('r-growth').textContent = t.growth;
+  renderRadarSVG(state.lastRadar || t.radar);
+}
+
+function renderRadarSVG(values){
+  var wrap = document.getElementById('radar-svg');
+  var size = 300, cx = size/2, cy = size/2, R = 118;
+  var names = DIMS.map(function(d){ return d.name; });
+  var n = values.length;
+  function pt(i, r){
+    var ang = -Math.PI/2 + (2*Math.PI*i/n);
+    return [cx + r*Math.cos(ang), cy + r*Math.sin(ang)];
+  }
+  function polyStr(r){
+    var pts=[];
+    for(var i=0;i<n;i++){ var p=pt(i,r); pts.push(p[0].toFixed(1)+','+p[1].toFixed(1)); }
+    return pts.join(' ');
+  }
+  var svg = '<svg viewBox="0 0 '+size+' '+size+'" width="100%" role="img" aria-label="黑暗特质雷达图">';
+  svg += '<defs><linearGradient id="radarFill" x1="0" y1="0" x2="0" y2="1">' +
+         '<stop offset="0" stop-color="#d84a63" stop-opacity="0.6"/>' +
+         '<stop offset="1" stop-color="#7b5fb0" stop-opacity="0.38"/></linearGradient></defs>';
+  [0.25,0.5,0.75,1].forEach(function(k){
+    svg += '<polygon points="'+polyStr(R*k)+'" fill="none" stroke="#3a2c54" stroke-width="1"/>';
+  });
+  for(var i=0;i<n;i++){
+    var p = pt(i, R);
+    svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="#3a2c54" stroke-width="1"/>';
+  }
+  var valPts = values.map(function(v,i){ return pt(i, R*v/100); });
+  var dataPoly = valPts.map(function(p){ return p[0].toFixed(1)+','+p[1].toFixed(1); }).join(' ');
+  svg += '<polygon points="'+dataPoly+'" fill="url(#radarFill)" stroke="#d84a63" stroke-width="2"/>';
+  valPts.forEach(function(p){
+    svg += '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="4" fill="#d84a63" stroke="#fff" stroke-width="1"/>';
+  });
+  for(var k=0;k<n;k++){
+    var lp = pt(k, R+24);
+    var anchor = Math.abs(lp[0]-cx)<4 ? 'middle' : (lp[0]<cx ? 'end':'start');
+    svg += '<text x="'+lp[0].toFixed(1)+'" y="'+(lp[1]+4).toFixed(1)+'" text-anchor="'+anchor+'" fill="#a89cbd" font-size="12">'+names[k]+'</text>';
+  }
+  for(var m=0;m<n;m++){
+    var v = values[m], tp = pt(m, R*v/100);
+    svg += '<text x="'+tp[0].toFixed(1)+'" y="'+(tp[1]-12).toFixed(1)+'" text-anchor="middle" fill="#f1ecfa" font-size="12" font-weight="700">'+v+'</text>';
+  }
+  svg += '</svg>';
+  wrap.innerHTML = svg;
+}
+
+/* ============================================================
+   保存档案长图（多途径，兼容电脑/手机、file:// 与 https）
+   ============================================================ */
+var shareDataUrl = '';
+document.getElementById('btn-save').addEventListener('click', function(){
+  try {
+    shareDataUrl = buildShareImage();
+    if(!shareDataUrl){ flash('生成图片失败，请重试','err'); return; }
+    // 展示预览
+    var box = document.getElementById('share-img-box');
+    box.innerHTML = '';
+    var img = document.createElement('img');
+    img.src = shareDataUrl; img.alt='我的反派人格档案';
+    box.appendChild(img);
+    document.getElementById('modal-share').classList.remove('hide');
+  } catch(e){
+    flash('生成图片失败：' + e.message, 'err');
+  }
+});
+
+function buildShareImage(){
+  var t = state.lastType;
+  if(!t) return '';
+  var W = 750, pad = 40, radar = state.lastRadar || t.radar;
+  var fontM = 17;
+  var analysisLines = 0;
+  t.analysis.forEach(function(b){ analysisLines += 2 + Math.ceil(b.txt.length/((W-pad*2)/fontM*0.5)); });
+  var H = 460 + 5*40 + analysisLines*30 + 360;
+  var c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  var ctx = c.getContext('2d');
+  var g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0a0710'); g.addColorStop(1,'#1c1328');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#b3374d'; ctx.fillRect(0,0,W,8);
+  ctx.fillStyle='#d9b45a'; ctx.fillRect(0,8,W,3);
+  ctx.textAlign='center';
+  ctx.fillStyle='#a89cbd'; ctx.font='600 22px "Noto Sans SC",sans-serif'; ctx.fillText('反派人格档案 · CONFIDENTIAL', W/2, 76);
+  ctx.fillStyle='#d84a63'; ctx.font='900 46px "Noto Serif SC",serif'; ctx.fillText(t.name, W/2, 138);
+  ctx.fillStyle='#d9b45a'; ctx.font='400 22px "Noto Sans SC",sans-serif'; ctx.fillText(t.profile, W/2, 176);
+  ctx.fillStyle='#d9b45a'; ctx.font='300 20px "Noto Sans SC",sans-serif'; ctx.fillText(t.quote, W/2, 214);
+  ctx.strokeStyle='rgba(217,180,90,.4)'; ctx.beginPath(); ctx.moveTo(pad,244); ctx.lineTo(W-pad,244); ctx.stroke();
+  ctx.textAlign='left';
+  ctx.fillStyle='#f1ecfa'; ctx.font='700 20px "Noto Sans SC",sans-serif'; ctx.fillText('黑暗特质维度', pad, 286);
+  var barY = 316;
+  DIMS.forEach(function(d, i){
+    var val = radar[i];
+    ctx.fillStyle='#a89cbd'; ctx.font='400 17px "Noto Sans SC",sans-serif'; ctx.fillText(d.name, pad, barY);
+    ctx.fillStyle='#2a2040'; ctx.fillRect(pad, barY+8, W-pad*2, 16);
+    var grad = ctx.createLinearGradient(pad,0,pad+(W-pad*2)*val/100,0);
+    grad.addColorStop(0,'#b3374d'); grad.addColorStop(1,'#7b5fb0');
+    ctx.fillStyle = grad; ctx.fillRect(pad, barY+8, Math.max((W-pad*2)*val/100, 3), 16);
+    ctx.fillStyle='#d9b45a'; ctx.font='700 17px "Noto Sans SC",sans-serif'; ctx.fillText(String(val), W-pad-44, barY);
+    barY += 40;
+  });
+  barY += 10;
+  ctx.fillStyle='#f1ecfa'; ctx.font='700 20px "Noto Sans SC",sans-serif'; ctx.fillText('档案分析', pad, barY);
+  barY += 40;
+  t.analysis.forEach(function(b){
+    ctx.fillStyle='#d9b45a'; ctx.font='600 17px "Noto Sans SC",sans-serif'; ctx.fillText(b.th, pad, barY); barY += 30;
+    ctx.fillStyle='#dcd2e8'; ctx.font='400 17px "Noto Sans SC",sans-serif';
+    var maxW = W-pad*2, lines=[], cur='';
+    for(var i=0;i<b.txt.length;i++){ cur+=b.txt[i]; if(ctx.measureText(cur).width>maxW){ lines.push(cur.slice(0,-1)); cur=b.txt[i]; } }
+    lines.push(cur);
+    lines.forEach(function(ln){ ctx.fillText(ln, pad, barY); barY += 30; });
+    barY += 14;
+  });
+  ctx.fillStyle='#f1ecfa'; ctx.font='700 20px "Noto Sans SC",sans-serif'; ctx.fillText('行动与转化', pad, barY); barY += 36;
+  ctx.fillStyle='#a89cbd'; ctx.font='400 16px "Noto Sans SC",sans-serif';
+  var gw=W-pad*2, glines=[], gcur='';
+  for(var j=0;j<t.growth.length;j++){ gcur+=t.growth[j]; if(ctx.measureText(gcur).width>gw){ glines.push(gcur.slice(0,-1)); gcur=t.growth[j]; } }
+  glines.push(gcur);
+  glines.forEach(function(ln){ ctx.fillText(ln, pad, barY); barY += 28; });
+  ctx.fillStyle='rgba(217,180,90,.5)'; ctx.beginPath(); ctx.moveTo(pad, H-110); ctx.lineTo(W-pad, H-110); ctx.stroke();
+  ctx.textAlign='center';
+  ctx.fillStyle='#f1ecfa'; ctx.font='700 18px "Noto Sans SC",sans-serif'; ctx.fillText('扫描/点击链接，解密你的反派人格', W/2, H-70);
+  ctx.fillStyle='#a89cbd'; ctx.font='400 14px "Noto Sans SC",sans-serif'; ctx.fillText(location.origin + location.pathname, W/2, H-42);
+  ctx.fillStyle='rgba(168,156,189,.7)'; ctx.font='400 13px "Noto Sans SC",sans-serif'; ctx.fillText('仅供娱乐参考 · 洞见真实的自己', W/2, H-18);
+  return c.toDataURL('image/png');
+}
+
+/* dataURL -> Blob */
+function dataUrlToBlob(dataUrl){
+  var parts = dataUrl.split(','); var mime = parts[0].match(/:(.*?);/)[1];
+  var bin = atob(parts[1]); var len = bin.length; var arr = new Uint8Array(len);
+  for(var i=0;i<len;i++){ arr[i]=bin.charCodeAt(i); }
+  return new Blob([arr], {type:mime});
+}
+
+/* 方式1：下载图片（Blob URL，最稳） */
+document.getElementById('btn-download-img').addEventListener('click', function(){
+  if(!shareDataUrl){ return; }
+  try {
+    var blob = dataUrlToBlob(shareDataUrl);
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = '反派人格档案_' + (state.lastType?state.lastType.name:'') + '.png';
+    a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
+    flash('图片已开始下载','ok');
+  } catch(e){
+    // 降级：新窗口打开
+    window.open(shareDataUrl);
+  }
+});
+
+/* 方式2：复制图片到剪贴板（兼容则用） */
+document.getElementById('btn-copy-img').addEventListener('click', function(){
+  if(!shareDataUrl){ return; }
+  try {
+    var blob = dataUrlToBlob(shareDataUrl);
+    if(navigator.clipboard && window.ClipboardItem){
+      navigator.clipboard.write([new ClipboardItem({'image/png': blob})]).then(
+        function(){ flash('图片已复制，可直接粘贴分享','ok'); },
+        function(){ window.open(shareDataUrl); }
+      );
+    } else {
+      window.open(shareDataUrl);
+      flash('已在新窗口打开，可长按/右键保存','ok');
+    }
+  } catch(e){ window.open(shareDataUrl); }
+});
+
+/* 方式3：打开原图（最通用，可长按/右键另存） */
+document.getElementById('btn-open-img').addEventListener('click', function(){
+  if(!shareDataUrl){ return; }
+  window.open(shareDataUrl);
+});
+
+document.getElementById('btn-share-close').addEventListener('click', function(){
+  document.getElementById('modal-share').classList.add('hide');
+});
+
+/* ============================================================
+   复制结果链接
+   ============================================================ */
+document.getElementById('btn-copy').addEventListener('click', function(){
+  var url = location.origin + location.pathname + '#share?t=' + state.lastTypeIndex + '&r=' + (state.lastRadar||[]).join(',');
+  function done(){ flash('已复制结果链接，快去分享吧','ok'); }
+  function fail(){
+    var ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){ prompt('复制失败，请手动复制：', url); }
+    document.body.removeChild(ta);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done, fail);
+  } else { fail(); }
+});
+
+/* ============================================================
+   再测一次
+   ============================================================ */
+document.getElementById('btn-again').addEventListener('click', function(){ startQuiz(); });
+
+/* ============================================================
+   好评有礼弹窗
+   ============================================================ */
+document.getElementById('btn-review').addEventListener('click', function(){
+  document.getElementById('modal-review').classList.remove('hide');
+});
+document.getElementById('btn-review-close').addEventListener('click', function(){
+  document.getElementById('modal-review').classList.add('hide');
+});
+document.getElementById('modal-review').addEventListener('click', function(e){
+  if(e.target === this) this.classList.add('hide');
+});
+
+var flashTimer = null;
+function flash(text, cls){
+  var m = document.getElementById('login-msg');
+  m.className='msg '+(cls||'ok');
+  m.textContent = text;
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(function(){ m.textContent=''; }, 3000);
+}
+
+/* ============================================================
+   初始化
+   ============================================================ */
+initPwd();
+route();
+</script>
+</body>
+</html>
