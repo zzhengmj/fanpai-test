@@ -772,7 +772,10 @@ function buildShareImage(){
   var W = 750, pad = 40, radar = state.lastRadar || t.radar;
   var fontM = 17;
   var analysisLines = 0;
-  t.analysis.forEach(function(b){ analysisLines += 2 + Math.ceil(b.txt.length/((W-pad*2)/fontM*0.5)); });
+  t.analysis.forEach(function(b){
+    if(b.txt){ analysisLines += 2 + Math.ceil(b.txt.length/((W-pad*2)/fontM*0.5)); }
+    else if(b.tags){ analysisLines += 2; }
+  });
   var H = 460 + 5*40 + analysisLines*30 + 360;
   var c = document.createElement('canvas');
   c.width = W; c.height = H;
@@ -806,12 +809,30 @@ function buildShareImage(){
   barY += 40;
   t.analysis.forEach(function(b){
     ctx.fillStyle='#d9b45a'; ctx.font='600 17px "Noto Sans SC",sans-serif'; ctx.fillText(b.th, pad, barY); barY += 30;
-    ctx.fillStyle='#dcd2e8'; ctx.font='400 17px "Noto Sans SC",sans-serif';
-    var maxW = W-pad*2, lines=[], cur='';
-    for(var i=0;i<b.txt.length;i++){ cur+=b.txt[i]; if(ctx.measureText(cur).width>maxW){ lines.push(cur.slice(0,-1)); cur=b.txt[i]; } }
-    lines.push(cur);
-    lines.forEach(function(ln){ ctx.fillText(ln, pad, barY); barY += 30; });
-    barY += 14;
+    if(b.tags){
+      // 标签块：渲染为圆角标签
+      var tx = pad, ty = barY - 5;
+      ctx.font='400 15px "Noto Sans SC",sans-serif';
+      b.tags.forEach(function(tag){
+        var tw = ctx.measureText(tag).width + 26;
+        if(tx + tw > W - pad){ tx = pad; ty += 34; }
+        ctx.fillStyle='#251a36'; ctx.strokeStyle='#4a3566'; ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(tx, ty, tw, 28, 14) : ctx.rect(tx, ty, tw, 28);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#f1ecfa'; ctx.textAlign='left';
+        ctx.fillText(tag, tx+13, ty+19);
+        tx += tw + 10;
+      });
+      barY = ty + 34 + 14;
+    } else if(b.txt){
+      ctx.fillStyle='#dcd2e8'; ctx.font='400 17px "Noto Sans SC",sans-serif';
+      var maxW = W-pad*2, lines=[], cur='';
+      for(var i=0;i<b.txt.length;i++){ cur+=b.txt[i]; if(ctx.measureText(cur).width>maxW){ lines.push(cur.slice(0,-1)); cur=b.txt[i]; } }
+      lines.push(cur);
+      lines.forEach(function(ln){ ctx.fillText(ln, pad, barY); barY += 30; });
+      barY += 14;
+    }
   });
   ctx.fillStyle='#f1ecfa'; ctx.font='700 20px "Noto Sans SC",sans-serif'; ctx.fillText('行动与转化', pad, barY); barY += 36;
   ctx.fillStyle='#a89cbd'; ctx.font='400 16px "Noto Sans SC",sans-serif';
