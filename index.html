@@ -386,6 +386,27 @@ input{font-family:inherit}
   </div>
 </div>
 
+<!-- ===== 弹窗：微信内无法保存的引导 ===== -->
+<div id="modal-wechat" class="modal-mask hide">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div class="m-title">微信内暂不能直接保存</div>
+    <div class="m-body" style="font-size:13px;color:#dcd2e8;line-height:2">
+      微信限制网页直接保存图片到相册。<br>请按下面 3 步，用浏览器打开后即可一键保存：
+      <div style="margin:14px 0;text-align:left;background:var(--card2);border:1px solid var(--line-hi);border-radius:12px;padding:14px">
+        <span style="display:block"><b style="color:var(--gold)">①</b> 点右上角 <b style="color:var(--gold)">⋯</b> 按钮</span>
+        <span style="display:block"><b style="color:var(--gold)">②</b> 选择「<b style="color:var(--gold)">在浏览器中打开</b>」</span>
+        <span style="display:block"><b style="color:var(--gold)">③</b> 在浏览器里点「保存图片到相册」即可</span>
+      </div>
+      <span style="font-size:11px;color:#6f6286">或：长按下方小图，尝试保存</span>
+    </div>
+    <div class="share-img-box" id="wechat-thumb-box" style="margin:0 0 12px"></div>
+    <div class="modal-actions" style="justify-content:center">
+      <button class="btn btn-ghost" id="btn-wechat-open">打开原图 · 长按保存</button>
+      <button class="btn btn-ghost" id="btn-wechat-close">我知道了</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 弹窗：保存长图 ===== -->
 <div id="modal-share" class="modal-mask hide">
   <div class="modal" style="max-width:400px">
@@ -838,10 +859,9 @@ function downloadShareImage(){
   if(!shareDataUrl){ return; }
   var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   var isWechat = /MicroMessenger/i.test(navigator.userAgent);
-  // 微信内置：直接展示全屏长图，长按即可保存到相册（微信唯一允许的方式）
+  // 微信内置：无法自动保存，弹引导（浏览器打开） + 小图长按兜底
   if(isWechat){
-    showFullImage(shareDataUrl);
-    flash('微信内请长按图片保存到相册','ok');
+    showWechatGuide();
     return;
   }
   // 尝试 a[download] 触发（桌面 + 安卓 Chrome 可直接保存）
@@ -867,6 +887,27 @@ function downloadShareImage(){
   }
 }
 document.getElementById('btn-fullimg-save').addEventListener('click', downloadShareImage);
+
+/* 微信内无法直接保存：弹引导弹窗 + 小图长按兜底 */
+function showWechatGuide(){
+  var box = document.getElementById('wechat-thumb-box');
+  box.innerHTML = '';
+  var img = document.createElement('img');
+  img.src = shareDataUrl; img.alt='档案缩略图，可长按保存'; img.style.maxWidth='100%'; img.style.borderRadius='8px';
+  box.appendChild(img);
+  document.getElementById('modal-wechat').classList.remove('hide');
+}
+document.getElementById('btn-wechat-open').addEventListener('click', function(){
+  // 全屏展示（dataURL），微信内可长按保存
+  showFullImage(shareDataUrl);
+  document.getElementById('modal-wechat').classList.add('hide');
+});
+document.getElementById('btn-wechat-close').addEventListener('click', function(){
+  document.getElementById('modal-wechat').classList.add('hide');
+});
+document.getElementById('modal-wechat').addEventListener('click', function(e){
+  if(e.target === this) this.classList.add('hide');
+});
 
 /* ============================================================
    计分 + 结果判定
