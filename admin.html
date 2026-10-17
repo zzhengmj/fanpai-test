@@ -89,6 +89,16 @@ td.code{font-family:monospace;letter-spacing:1px}
 
 .toolbar{display:flex;justify-content:flex-end;margin-bottom:10px}
 .toolbar .btn{min-height:40px;padding:0 16px;font-size:13px}
+.key-gen{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.key-gen input{width:80px;background:var(--card2);border:1px solid var(--line);border-radius:10px;
+  color:var(--text);font-size:14px;padding:11px 12px;text-align:center;outline:none}
+.key-gen input:focus{border-color:var(--line-hi)}
+.key-gen .btn{min-height:44px;font-size:13px}
+.key-gen-result{margin-bottom:12px;font-size:13px;color:var(--gold);padding:10px 14px;
+  background:rgba(217,180,90,.08);border:1px dashed rgba(217,180,90,.35);border-radius:10px;word-break:break-all;line-height:1.8}
+.del-btn{background:none;border:1px solid var(--line);color:var(--muted);font-size:12px;padding:5px 12px;
+  border-radius:8px;cursor:pointer}
+.del-btn:hover{color:var(--red);border-color:var(--red)}
 
 .toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(18px);
   background:rgba(20,13,32,.94);border:1px solid var(--line-hi);color:var(--text);padding:12px 22px;border-radius:30px;
@@ -128,14 +138,17 @@ td.code{font-family:monospace;letter-spacing:1px}
 
     <div class="panel">
       <h2><span class="sq"></span>密钥使用情况</h2>
-      <div class="toolbar">
+      <div class="key-gen" id="key-gen">
+        <input type="number" id="gen-count" value="10" min="1" max="100">
+        <button class="btn btn-gold" id="btn-gen-keys">批量生成新密钥</button>
         <button class="btn btn-ghost" id="btn-refresh-keys">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
           刷新
         </button>
       </div>
+      <div class="key-gen-result" id="key-gen-result"></div>
       <table id="keys-table">
-        <thead><tr><th>密钥</th><th>状态</th><th>创建时间</th></tr></thead>
+        <thead><tr><th>密钥</th><th>状态</th><th>创建时间</th><th style="width:60px">操作</th></tr></thead>
         <tbody id="keys-body"></tbody>
       </table>
     </div>
@@ -234,11 +247,20 @@ function loadKeys(){
       var tr = document.createElement('tr');
       tr.innerHTML = '<td class="code">'+k.key_text+'</td>' +
         '<td><span class="badge '+(k.used?'used':'avail')+'">'+(k.used?'已使用':'可用')+'</span></td>' +
-        '<td>'+(k.created_at||'-')+'</td>';
+        '<td>'+(k.created_at||'-')+'</td>' +
+        '<td><button class="del-btn" data-key="'+k.key_text+'">删除</button></td>';
       tbody.appendChild(tr);
     });
+    // 删除按钮绑定
+    tbody.querySelectorAll('.del-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(confirm('确定删除密钥 '+btn.getAttribute('data-key')+' 吗？\n删除后将同时清除该密钥产生的测试结果。')) {
+          deleteKey(btn.getAttribute('data-key'));
+        }
+      });
+    });
     if(!list.length){
-      tbody.innerHTML = '<tr><td colspan="3" class="empty">暂无密钥</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">暂无密钥</td></tr>';
     }
     document.getElementById('s-total').textContent = list.length;
     document.getElementById('s-used').textContent = used;
@@ -287,6 +309,51 @@ function loadStats(){
 
 function getPwd(){ return document.getElementById('pwd-input').value; }
 
+/* ===== 密钥管理：批量生成 + 删除 ===== */
+var GEN_CHARSET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function genOneKey(len){
+  var s='';
+  for(var i=0;i<len;i++){ s += GEN_CHARSET.charAt(Math.floor(Math.random()*GEN_CHARSET.length)); }
+  return s;
+}
+function genKeys(n){
+  var arr=[], seen={};
+  for(var i=0;i<n;i++){
+    var k; do { k = genOneKey(8); } while(seen[k]);
+    seen[k]=1; arr.push(k);
+  }
+  return arr;
+}
+function generateKeys(){
+  var count = parseInt(document.getElementById('gen-count').value||'10',10);
+  if(!count || count<1){ count=10; }
+  if(count>100){ count=100; }
+  var pwd = getPwd();
+  var keys = genKeys(count);
+  supabaseRpc('admin_add_keys', { p_pwd: pwd, p_keys: keys }).then(function(res){
+    if(res && res.ok){
+      document.getElementById('key-gen-result').innerHTML =
+        '已新增 ' + res.added + ' 枚密钥，请复制发给客户：<br>' + keys.join('&nbsp;&nbsp;');
+      loadKeys();
+      toast('生成成功','ok');
+    } else {
+      toast('生成失败','err');
+    }
+  }).catch(function(){ toast('网络异常','err'); });
+}
+function deleteKey(k){
+  var pwd = getPwd();
+  supabaseRpc('admin_delete_key', { p_pwd: pwd, p_key: k }).then(function(res){
+    if(res && res.ok){
+      toast('已删除密钥 ' + k, 'ok');
+      loadKeys();
+    } else {
+      toast('删除失败','err');
+    }
+  }).catch(function(){ toast('网络异常','err'); });
+}
+
+document.getElementById('btn-gen-keys').addEventListener('click', generateKeys);
 document.getElementById('btn-refresh-keys').addEventListener('click', loadKeys);
 document.getElementById('btn-refresh-stats').addEventListener('click', loadStats);
 
