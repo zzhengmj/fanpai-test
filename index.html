@@ -514,15 +514,21 @@ var RESULT_TYPES = [
 ];
 
 /* ============================================================
-   密钥池（运营方发放，每枚仅用一次，不在前端展示生成）
+   Supabase 后端配置（密钥已服务端化，前端不再包含任何密钥）
    ============================================================ */
-var KEY_POOL = [
-  '34QZ4R8Z','BXU6GGP9','B4B6U5TQ','KMRZWU2U','D76YQXXF',
-  'VPGT2EVC','X9G6RQKR','RP6KDP7F','K9AGFZ2C','V54CSZJS',
-  'W2MDF82E','JBNP99X3','VK6P4WK6','6XW8V64K','XF4VZ8FF',
-  'GAB9CGYF','83RZTBWM','VHK3MK7D','6P4UY2KB','682MAA83'
-];
-var USED_PREFIX = 'fp_used_';
+var SUPABASE_URL = 'https://wdidvlqlxbrgwvaodfep.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkaWR2bHFseGJyZ3d2YW9kZmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIyMjYwMjYsImV4cCI6MjEwNzgwMjAyNn0.22I99_wMpCpU9o1xGDEOazPTASLS7CgjfIQhXS5B1gI';
+function supabaseRpc(fn, body){
+  return fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body || {})
+  }).then(function(res){ return res.json(); });
+}
 
 /* ============================================================
    状态
@@ -574,20 +580,23 @@ function unlock(){
   var val = document.getElementById('pwd-input').value.trim().toUpperCase();
   var msg = document.getElementById('login-msg');
   if(!val){ msg.className='msg err'; msg.textContent='请输入访问密钥'; return; }
-  // 校验：必须在密钥池内
-  if(KEY_POOL.indexOf(val) === -1){
-    msg.className='msg err'; msg.textContent='密钥无效，请核对后重试';
-    return;
-  }
-  // 校验：仅可使用一次
-  if(localStorage.getItem(USED_PREFIX + val)){
-    msg.className='msg err'; msg.textContent='该密钥已使用过，无法再次解锁';
-    return;
-  }
-  localStorage.setItem(USED_PREFIX + val, '1');
-  msg.className='msg ok';
-  msg.textContent='密钥验证通过，正在解密…';
-  location.hash = '#intro';
+  msg.className='msg'; msg.textContent='正在校验密钥…';
+  // 调用 Supabase 服务端校验（密钥在服务端，前端不含密钥）
+  supabaseRpc('validate_key', { p_key: val }).then(function(res){
+    if(res && res.ok){
+      state.unlockedKey = val;
+      msg.className='msg ok'; msg.textContent='密钥验证通过，正在解密…';
+      setTimeout(function(){ location.hash = '#intro'; }, 400);
+    } else {
+      var reason = res && res.reason;
+      msg.className='msg err';
+      if(reason==='used'){ msg.textContent='该密钥已使用过，无法再次解锁'; }
+      else if(reason==='invalid'){ msg.textContent='密钥无效，请核对后重试'; }
+      else { msg.textContent='校验失败，请稍后重试'; }
+    }
+  }).catch(function(){
+    msg.className='msg err'; msg.textContent='网络异常，校验失败，请重试';
+  });
 }
 
 /* ============================================================
@@ -667,6 +676,11 @@ function computeResult(){
   });
   state.lastType = RESULT_TYPES[best];
   state.lastTypeIndex = best;
+  // 上报测试结果到服务端（用于运营统计；失败不影响结果展示）
+  if(state.unlockedKey){
+    supabaseRpc('record_result', { p_key: state.unlockedKey, p_type: best, p_radar: radar.join(',') })
+      .catch(function(){});
+  }
   showView('result');
   renderResult();
   try { history.replaceState(null, '', '#share?t='+best+'&r='+radar.join(',')); }
