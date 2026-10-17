@@ -387,7 +387,7 @@ input{font-family:inherit}
 </div>
 
 <!-- ===== 弹窗：微信内无法保存的引导 ===== -->
-<div id="modal-wechat" class="modal-mask hide">
+<div id="modal-wechat" class="modal-mask hide" style="z-index:70">
   <div class="modal" style="max-width:400px;text-align:center">
     <div class="m-title">微信内暂不能直接保存</div>
     <div class="m-body" style="font-size:13px;color:#dcd2e8;line-height:2">
@@ -890,6 +890,9 @@ document.getElementById('btn-fullimg-save').addEventListener('click', downloadSh
 
 /* 微信内无法直接保存：弹引导弹窗 + 小图长按兜底 */
 function showWechatGuide(){
+  // 先关闭可能叠加的保存弹窗/全屏，避免被遮挡
+  document.getElementById('modal-share').classList.add('hide');
+  closeFullImage();
   var box = document.getElementById('wechat-thumb-box');
   box.innerHTML = '';
   var img = document.createElement('img');
