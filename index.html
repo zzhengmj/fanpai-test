@@ -809,10 +809,15 @@ function openFullImageFromReport(r){
 }
 var currentBlobUrl = '';
 function showFullImage(url){
-  // dataURL -> blob URL：长按/下载保存更稳定，避免手机"图片下载失败"
-  try {
-    currentBlobUrl = URL.createObjectURL(dataUrlToBlob(url));
-  } catch(e){ currentBlobUrl = url; }
+  // 微信内置浏览器：长按保存需要真实 dataURL；其他环境用 blob URL（体积小更稳）
+  var isWechat = /MicroMessenger/i.test(navigator.userAgent);
+  if(!isWechat){
+    try {
+      currentBlobUrl = URL.createObjectURL(dataUrlToBlob(url));
+    } catch(e){ currentBlobUrl = url; }
+  } else {
+    currentBlobUrl = url;
+  }
   document.getElementById('fullimg-img').src = currentBlobUrl;
   document.getElementById('fullimg').classList.remove('hide');
   document.body.style.overflow = 'hidden';
@@ -828,11 +833,17 @@ document.getElementById('fullimg').addEventListener('click', function(e){
   if(e.target === this) closeFullImage();
 });
 /* 保存图片到相册：优先 a[download]（安卓/桌面直接下载进相册或本地），
-   不支持的浏览器（iOS/微信内置）自动打开原图，引导长按保存 */
+   微信内置/部分浏览器不支持下载，则展示全屏长图引导长按保存（微信支持长按图片存相册） */
 function downloadShareImage(){
   if(!shareDataUrl){ return; }
   var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   var isWechat = /MicroMessenger/i.test(navigator.userAgent);
+  // 微信内置：直接展示全屏长图，长按即可保存到相册（微信唯一允许的方式）
+  if(isWechat){
+    showFullImage(shareDataUrl);
+    flash('微信内请长按图片保存到相册','ok');
+    return;
+  }
   // 尝试 a[download] 触发（桌面 + 安卓 Chrome 可直接保存）
   try {
     var blob = dataUrlToBlob(shareDataUrl);
@@ -846,13 +857,11 @@ function downloadShareImage(){
     a.click();
     document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-    // 微信/iOS 的 a.click 通常被忽略，需引导长按
-    if(isWechat){ flash('微信内无法直接下载，已打开原图，请长按保存','ok'); window.open(shareDataUrl); }
-    else if(isIOS){ flash('请长按图片保存到相册','ok'); showFullImage(shareDataUrl); }
+    // iOS 的 a.click 通常被忽略，展示长图引导长按
+    if(isIOS){ flash('请长按图片保存到相册','ok'); showFullImage(shareDataUrl); }
     else { flash('图片已开始下载，请查收','ok'); }
   } catch(e){
-    // 降级：打开原图新窗口 / 全屏，长按保存
-    try { window.open(shareDataUrl); } catch(e2){}
+    // 降级：展示全屏长图，长按保存
     showFullImage(shareDataUrl);
     flash('请长按图片保存到相册','ok');
   }
