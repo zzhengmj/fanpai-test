@@ -376,8 +376,12 @@ input{font-family:inherit}
 <!-- ===== 弹窗：全屏查看长图 ===== -->
 <div id="fullimg" class="fullimg-mask hide">
   <button class="fi-close" id="btn-fullimg-close">✕</button>
-  <div class="fi-tip">手机长按图片即可保存到相册<br>点击右上角 ✕ 关闭</div>
+  <div class="fi-tip">点击下方「保存图片」，或长按图片保存到相册</div>
   <img id="fullimg-img" src="" alt="反派人格档案长图">
+  <button class="btn btn-gold" id="btn-fullimg-save" style="margin-top:14px;width:100%;max-width:420px">
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+    保存图片到相册
+  </button>
 </div>
 
 <!-- ===== 弹窗：保存长图 ===== -->
@@ -798,12 +802,18 @@ function openFullImageFromReport(r){
   state.lastType = savedType; state.lastTypeIndex = savedIdx; state.lastRadar = savedRadar;
   if(url){ showFullImage(url); }
 }
+var currentBlobUrl = '';
 function showFullImage(url){
-  document.getElementById('fullimg-img').src = url;
+  // dataURL -> blob URL：长按/下载保存更稳定，避免手机"图片下载失败"
+  try {
+    currentBlobUrl = URL.createObjectURL(dataUrlToBlob(url));
+  } catch(e){ currentBlobUrl = url; }
+  document.getElementById('fullimg-img').src = currentBlobUrl;
   document.getElementById('fullimg').classList.remove('hide');
   document.body.style.overflow = 'hidden';
 }
 function closeFullImage(){
+  if(currentBlobUrl){ URL.revokeObjectURL(currentBlobUrl); currentBlobUrl=''; }
   document.getElementById('fullimg').classList.add('hide');
   document.body.style.overflow = '';
   document.getElementById('fullimg-img').src = '';
@@ -812,6 +822,29 @@ document.getElementById('btn-fullimg-close').addEventListener('click', closeFull
 document.getElementById('fullimg').addEventListener('click', function(e){
   if(e.target === this) closeFullImage();
 });
+/* 保存图片到相册/文件：blob + a[download]，多途径降级 */
+function downloadShareImage(){
+  if(!shareDataUrl){ return; }
+  try {
+    var blob = dataUrlToBlob(shareDataUrl);
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = '反派人格档案_' + (state.lastType ? state.lastType.name : '') + '.jpg';
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    flash('图片已开始下载，请查收', 'ok');
+  } catch(e){
+    // 降级：全屏展示，长按保存
+    showFullImage(shareDataUrl);
+    flash('请在弹窗中长按图片保存', 'ok');
+  }
+}
+document.getElementById('btn-fullimg-save').addEventListener('click', downloadShareImage);
 
 /* ============================================================
    计分 + 结果判定
@@ -1020,7 +1053,7 @@ function buildShareImage(){
   ctx.fillStyle='#f1ecfa'; ctx.font='700 18px "Noto Sans SC",sans-serif'; ctx.fillText('扫描/点击链接，解密你的反派人格', W/2, H-70);
   ctx.fillStyle='#a89cbd'; ctx.font='400 14px "Noto Sans SC",sans-serif'; ctx.fillText(location.origin + location.pathname, W/2, H-42);
   ctx.fillStyle='rgba(168,156,189,.7)'; ctx.font='400 13px "Noto Sans SC",sans-serif'; ctx.fillText('仅供娱乐参考 · 洞见真实的自己', W/2, H-18);
-  return c.toDataURL('image/png');
+  return c.toDataURL('image/jpeg', 0.92);
 }
 
 /* dataURL -> Blob */
@@ -1031,28 +1064,8 @@ function dataUrlToBlob(dataUrl){
   return new Blob([arr], {type:mime});
 }
 
-/* 方式1：下载图片（Blob URL + 多种触发，兼容手机/电脑） */
-document.getElementById('btn-download-img').addEventListener('click', function(){
-  if(!shareDataUrl){ return; }
-  try {
-    var blob = dataUrlToBlob(shareDataUrl);
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = '反派人格档案_' + (state.lastType?state.lastType.name:'') + '.png';
-    a.rel = 'noopener';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-    flash('图片已开始下载，请查收', 'ok');
-  } catch(e){
-    // 降级：新窗口打开原图，用户可长按/右键保存
-    window.open(shareDataUrl);
-    flash('已在新窗口打开，可长按或右键保存', 'ok');
-  }
-});
+/* 保存弹窗里的下载按钮：统一走 downloadShareImage */
+document.getElementById('btn-download-img').addEventListener('click', downloadShareImage);
 
 /* 方式2：打开原图（手机最可靠：全屏展示，长按保存到相册） */
 document.getElementById('btn-open-img').addEventListener('click', function(){
