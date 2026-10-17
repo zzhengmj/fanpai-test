@@ -376,16 +376,12 @@ input{font-family:inherit}
 <!-- ===== 弹窗：全屏查看长图 ===== -->
 <div id="fullimg" class="fullimg-mask hide">
   <button class="fi-close" id="btn-fullimg-close">✕</button>
-  <div class="fi-tip">一键分享或保存这张档案长图</div>
+  <div class="fi-tip">点击下方「保存图片」直接存入相册<br>也可长按图片保存</div>
   <img id="fullimg-img" src="" alt="反派人格档案长图">
   <div style="width:100%;max-width:420px;margin-top:14px;display:flex;flex-direction:column;gap:10px">
-    <button class="btn btn-gold" id="btn-fullimg-share">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6"/><path d="M12 2v14M8 6l4-4 4 4"/></svg>
-      一键分享 · 可保存到相册 / 发给好友
-    </button>
-    <button class="btn btn-ghost" id="btn-fullimg-save">
+    <button class="btn btn-gold" id="btn-fullimg-save">
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-      保存图片
+      保存图片到相册
     </button>
   </div>
 </div>
@@ -393,17 +389,16 @@ input{font-family:inherit}
 <!-- ===== 弹窗：保存长图 ===== -->
 <div id="modal-share" class="modal-mask hide">
   <div class="modal" style="max-width:400px">
-    <div class="m-title">保存 / 分享档案</div>
+    <div class="m-title">保存档案</div>
     <div class="share-img-box" id="share-img-box"></div>
-    <div class="m-body" id="share-hint" style="font-size:12px;color:var(--muted)">手机：点击「一键分享」，可保存到相册或发给微信好友<br>电脑：点击「下载图片」保存到本地</div>
+    <div class="m-body" id="share-hint" style="font-size:12px;color:var(--muted)">手机：点击「保存图片到相册」直接保存<br>电脑：点击「下载图片」保存到本地</div>
     <div class="modal-actions">
-      <button class="btn btn-gold" id="btn-modal-share">
-        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6"/><path d="M12 2v14M8 6l4-4 4 4"/></svg>
-        一键分享 · 保存到相册 / 发给好友
+      <button class="btn btn-gold" id="btn-download-img">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        保存图片到相册
       </button>
       <div class="btn-row">
-        <button class="btn btn-ghost" id="btn-download-img">下载图片</button>
-        <button class="btn btn-ghost" id="btn-open-img">打开原图</button>
+        <button class="btn btn-ghost" id="btn-open-img">打开原图 · 长按保存</button>
       </div>
       <button class="btn btn-ghost" id="btn-share-close">关闭</button>
     </div>
@@ -832,9 +827,13 @@ document.getElementById('btn-fullimg-close').addEventListener('click', closeFull
 document.getElementById('fullimg').addEventListener('click', function(e){
   if(e.target === this) closeFullImage();
 });
-/* 保存图片到相册/文件：blob + a[download]，多途径降级 */
+/* 保存图片到相册：优先 a[download]（安卓/桌面直接下载进相册或本地），
+   不支持的浏览器（iOS/微信内置）自动打开原图，引导长按保存 */
 function downloadShareImage(){
   if(!shareDataUrl){ return; }
+  var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  var isWechat = /MicroMessenger/i.test(navigator.userAgent);
+  // 尝试 a[download] 触发（桌面 + 安卓 Chrome 可直接保存）
   try {
     var blob = dataUrlToBlob(shareDataUrl);
     var url = URL.createObjectURL(blob);
@@ -847,46 +846,18 @@ function downloadShareImage(){
     a.click();
     document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-    flash('图片已开始下载，请查收', 'ok');
+    // 微信/iOS 的 a.click 通常被忽略，需引导长按
+    if(isWechat){ flash('微信内无法直接下载，已打开原图，请长按保存','ok'); window.open(shareDataUrl); }
+    else if(isIOS){ flash('请长按图片保存到相册','ok'); showFullImage(shareDataUrl); }
+    else { flash('图片已开始下载，请查收','ok'); }
   } catch(e){
-    // 降级：全屏展示，长按保存
+    // 降级：打开原图新窗口 / 全屏，长按保存
+    try { window.open(shareDataUrl); } catch(e2){}
     showFullImage(shareDataUrl);
-    flash('请在弹窗中长按图片保存', 'ok');
+    flash('请长按图片保存到相册','ok');
   }
 }
 document.getElementById('btn-fullimg-save').addEventListener('click', downloadShareImage);
-
-/* 一键分享：Web Share API 分享图片文件（手机原生面板：可存相册/发微信） */
-function shareImage(){
-  if(!shareDataUrl){ flash('图片未生成，请稍后再试','err'); return; }
-  var canShare = navigator.canShare && navigator.share;
-  if(!canShare){
-    // 不支持原生分享：降级为下载
-    downloadShareImage();
-    return;
-  }
-  try {
-    var blob = dataUrlToBlob(shareDataUrl);
-    var file = new File([blob], '反派人格档案_' + (state.lastType?state.lastType.name:'') + '.jpg', {type:'image/jpeg'});
-    if(!navigator.canShare({files:[file]})){
-      downloadShareImage(); return;
-    }
-    navigator.share({
-      files: [file],
-      title: '我的反派人格测试结果',
-      text: '测出了我的反派人格是「' + (state.lastType?state.lastType.name:'') + '」，你也来测测！'
-    }).then(function(){
-      // 分享面板关闭即成功（用户可能存相册或发好友）
-    }).catch(function(err){
-      if(err && err.name === 'AbortError'){ /* 用户取消 */ }
-      else { flash('分享未完成，已改为下载图片','ok'); downloadShareImage(); }
-    });
-  } catch(e){
-    downloadShareImage();
-  }
-}
-document.getElementById('btn-fullimg-share').addEventListener('click', shareImage);
-document.getElementById('btn-modal-share').addEventListener('click', shareImage);
 
 /* ============================================================
    计分 + 结果判定
