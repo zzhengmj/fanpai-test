@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>反派人格档案 · 运营后台</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Serif+SC:wght@400;600;700;900&display=swap">
+<style>
+:root{
+  --bg:#0a0710; --card:#1c1328; --card2:#251a36; --line:#342648; --line-hi:#4a3566;
+  --crimson:#b3374d; --crimson-hi:#d84a63; --gold:#d9b45a; --gold-dim:#9c7f3f;
+  --text:#f1ecfa; --muted:#a89cbd; --purple:#7b5fb0; --green:#82d79b; --red:#ec6f86;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:"Noto Sans SC",system-ui,sans-serif;color:var(--text);line-height:1.6;
+  background:var(--bg);-webkit-font-smoothing:antialiased;min-height:100vh;
+  background-image:radial-gradient(1200px 700px at 85% -10%,rgba(123,95,176,.14),transparent 60%),
+    radial-gradient(900px 700px at -10% 30%,rgba(179,55,77,.08),transparent 55%);
+  background-attachment:fixed;
+}
+.wrap{max-width:760px;margin:0 auto;padding:30px 18px 60px}
+.hide{display:none!important}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;
+  border-radius:14px;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;border:none;transition:transform .12s,filter .25s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--crimson),#8f2438);color:#fff;width:100%;
+  box-shadow:0 10px 26px rgba(179,55,77,.35)}
+.btn-ghost{background:var(--card2);border:1px solid var(--line-hi);color:var(--text)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#a9872f);color:#1a1204}
+
+/* 登录 */
+.login-card{background:linear-gradient(165deg,var(--card),#120c1d);border:1px solid var(--line-hi);
+  border-radius:22px;padding:34px 26px;max-width:420px;margin:8vh auto 0;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.login-card h1{font-size:24px;font-weight:900;letter-spacing:3px;text-align:center;margin-bottom:6px}
+.login-card h1 .c{color:var(--crimson-hi)}
+.login-card .sub{text-align:center;color:var(--muted);font-size:12px;letter-spacing:3px;margin-bottom:28px}
+.login-card .field{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.login-card .field input{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:16px}
+.login-card .field input::placeholder{color:#5c5072}
+.msg{text-align:center;font-size:13px;min-height:22px;margin-top:12px}
+.msg.err{color:var(--red)} .msg.ok{color:var(--green)}
+
+/* 顶部 */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;padding:0 4px}
+.topbar .brand{font-weight:900;font-size:17px;letter-spacing:2px}
+.topbar .brand .c{color:var(--crimson-hi)}
+.topbar .logout{color:var(--muted);font-size:13px;cursor:pointer;border:1px solid var(--line);padding:8px 16px;border-radius:30px}
+.topbar .logout:hover{color:var(--red);border-color:var(--red)}
+
+/* 统计卡 */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.stat{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line-hi);
+  border-radius:16px;padding:16px 12px;text-align:center}
+.stat .num{font-size:28px;font-weight:900;color:var(--gold);font-family:"Noto Serif SC",serif}
+.stat .lbl{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:1px}
+
+/* 面板 */
+.panel{background:linear-gradient(160deg,var(--card),#140e20);border:1px solid var(--line-hi);
+  border-radius:18px;padding:20px;margin-bottom:18px}
+.panel h2{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel h2 .sq{width:8px;height:18px;border-radius:3px;background:linear-gradient(var(--crimson),var(--purple))}
+
+/* 密钥表 */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:11px;letter-spacing:1px;font-weight:500}
+td{color:var(--text)}
+td.code{font-family:monospace;letter-spacing:1px}
+.badge{display:inline-block;font-size:11px;padding:3px 12px;border-radius:14px;font-weight:600}
+.badge.used{background:rgba(236,111,134,.16);color:var(--red);border:1px solid rgba(236,111,134,.4)}
+.badge.avail{background:rgba(130,215,155,.14);color:var(--green);border:1px solid rgba(130,215,155,.4)}
+.empty{text-align:center;color:var(--muted);padding:30px 0;font-size:13px}
+
+/* 结果类型条 */
+.type-list{display:flex;flex-direction:column;gap:10px}
+.type-row{display:flex;align-items:center;gap:12px;font-size:13px}
+.type-row .name{width:100px;flex:none;color:var(--text)}
+.type-row .bar{flex:1;height:16px;background:#2a2040;border-radius:9px;overflow:hidden}
+.type-row .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--crimson),var(--purple));border-radius:9px}
+.type-row .cnt{width:36px;text-align:right;color:var(--gold);font-weight:700}
+
+/* 最近记录 */
+.recent-list{display:flex;flex-direction:column;gap:8px}
+.recent-item{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:12px}
+.recent-item .rtype{color:var(--crimson-hi);font-weight:700}
+.recent-item .rtime{color:var(--muted)}
+
+.toolbar{display:flex;justify-content:flex-end;margin-bottom:10px}
+.toolbar .btn{min-height:40px;padding:0 16px;font-size:13px}
+
+.toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(18px);
+  background:rgba(20,13,32,.94);border:1px solid var(--line-hi);color:var(--text);padding:12px 22px;border-radius:30px;
+  font-size:14px;box-shadow:0 12px 44px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:all .25s;z-index:120}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (max-width:520px){.stats-grid{grid-template-columns:repeat(3,1fr)} .stat .num{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 登录视图 -->
+  <section id="view-login">
+    <div class="login-card">
+      <h1>反派<span class="c">档案</span>后台</h1>
+      <div class="sub">OPERATION CONSOLE</div>
+      <div class="field">
+        <input type="password" id="pwd-input" placeholder="请输入管理密码" autocomplete="off">
+      </div>
+      <button class="btn btn-primary" id="btn-login">进入后台</button>
+      <div class="msg" id="login-msg"></div>
+    </div>
+  </section>
+
+  <!-- 数据视图 -->
+  <section id="view-data" class="hide">
+    <div class="topbar">
+      <div class="brand">反派<span class="c">档案</span> · 运营后台</div>
+      <button class="logout" id="btn-logout">退出登录</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat"><div class="num" id="s-total">0</div><div class="lbl">密钥总数</div></div>
+      <div class="stat"><div class="num" id="s-used" style="color:var(--red)">0</div><div class="lbl">已使用</div></div>
+      <div class="stat"><div class="num" id="s-avail" style="color:var(--green)">0</div><div class="lbl">可用</div></div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="sq"></span>密钥使用情况</h2>
+      <div class="toolbar">
+        <button class="btn btn-ghost" id="btn-refresh-keys">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          刷新
+        </button>
+      </div>
+      <table id="keys-table">
+        <thead><tr><th>密钥</th><th>状态</th><th>创建时间</th></tr></thead>
+        <tbody id="keys-body"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2><span class="sq"></span>测试结果统计</h2>
+      <div class="toolbar">
+        <button class="btn btn-ghost" id="btn-refresh-stats">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          刷新
+        </button>
+      </div>
+      <div id="stats-content">
+        <div class="type-list" id="type-list"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="sq"></span>最近 50 条测试记录</h2>
+      <div id="recent-list"></div>
+    </div>
+  </section>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+/* ===== Supabase 配置（与主站相同） ===== */
+var SUPABASE_URL = 'https://wdidvlqlxbrgwvaodfep.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkaWR2bHFseGJyZ3d2YW9kZmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIyMjYwMjYsImV4cCI6MjEwNzgwMjAyNn0.22I99_wMpCpU9o1xGDEOazPTASLS7CgjfIQhXS5B1gI';
+var RESULT_NAMES = ['腹黑权谋家','疯批偏执者','白切黑伪善者','冷漠旁观者','美强惨复仇者','纯粹野心家'];
+
+function supabaseRpc(fn, body){
+  return fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body || {})
+  }).then(function(res){ return res.json(); });
+}
+
+var flashTimer=null;
+function toast(text, cls){
+  var t=document.getElementById('toast');
+  t.textContent=text; t.className='toast show '+(cls||'ok');
+  clearTimeout(flashTimer);
+  flashTimer=setTimeout(function(){ t.className='toast'; }, 3000);
+}
+
+function showLogin(){ document.getElementById('view-login').classList.remove('hide'); document.getElementById('view-data').classList.add('hide'); }
+function showData(){ document.getElementById('view-login').classList.add('hide'); document.getElementById('view-data').classList.remove('hide'); }
+
+/* 登录 */
+document.getElementById('btn-login').addEventListener('click', login);
+document.getElementById('pwd-input').addEventListener('keydown', function(e){ if(e.key==='Enter') login(); });
+function login(){
+  var pwd = document.getElementById('pwd-input').value;
+  var msg = document.getElementById('login-msg');
+  if(!pwd){ msg.className='msg err'; msg.textContent='请输入管理密码'; return; }
+  msg.className='msg'; msg.textContent='正在验证…';
+  supabaseRpc('admin_get_keys', { p_pwd: pwd }).then(function(res){
+    if(res && res.ok){
+      sessionStorage.setItem('fp_admin', '1');
+      msg.className='msg ok'; msg.textContent='验证通过，正在加载数据…';
+      showData(); loadAll();
+    } else {
+      msg.className='msg err'; msg.textContent='密码错误，无法进入后台';
+    }
+  }).catch(function(){
+    msg.className='msg err'; msg.textContent='网络异常，请重试';
+  });
+}
+
+document.getElementById('btn-logout').addEventListener('click', function(){
+  sessionStorage.removeItem('fp_admin');
+  showLogin();
+  document.getElementById('pwd-input').value='';
+});
+
+/* 数据加载 */
+function loadAll(){ loadKeys(); loadStats(); }
+
+function loadKeys(){
+  var pwd = getPwd();
+  supabaseRpc('admin_get_keys', { p_pwd: pwd }).then(function(res){
+    if(!res || !res.ok){ toast('数据加载失败','err'); return; }
+    var list = res.data || [];
+    var used = 0;
+    var tbody = document.getElementById('keys-body');
+    tbody.innerHTML = '';
+    list.forEach(function(k){
+      if(k.used) used++;
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="code">'+k.key_text+'</td>' +
+        '<td><span class="badge '+(k.used?'used':'avail')+'">'+(k.used?'已使用':'可用')+'</span></td>' +
+        '<td>'+(k.created_at||'-')+'</td>';
+      tbody.appendChild(tr);
+    });
+    if(!list.length){
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">暂无密钥</td></tr>';
+    }
+    document.getElementById('s-total').textContent = list.length;
+    document.getElementById('s-used').textContent = used;
+    document.getElementById('s-avail').textContent = list.length - used;
+  }).catch(function(){ toast('密钥加载失败','err'); });
+}
+
+function loadStats(){
+  var pwd = getPwd();
+  supabaseRpc('admin_get_stats', { p_pwd: pwd }).then(function(res){
+    if(!res || !res.ok){ return; }
+    var total = res.total || 0;
+    var byType = res.by_type || [];
+    var recent = res.recent || [];
+    // 类型分布条
+    var tl = document.getElementById('type-list');
+    tl.innerHTML = '';
+    if(total === 0){
+      tl.innerHTML = '<div class="empty">暂无测试数据</div>';
+    } else {
+      byType.forEach(function(b){
+        var pct = Math.round((b.cnt/total)*100);
+        var row = document.createElement('div'); row.className='type-row';
+        row.innerHTML = '<span class="name">'+RESULT_NAMES[b.type]+'</span>' +
+          '<div class="bar"><i style="width:'+pct+'%"></i></div>' +
+          '<span class="cnt">'+b.cnt+'</span>';
+        tl.appendChild(row);
+      });
+    }
+    // 最近记录
+    var rl = document.getElementById('recent-list');
+    rl.innerHTML = '';
+    if(!recent.length){
+      rl.innerHTML = '<div class="empty">暂无记录</div>';
+    } else {
+      recent.forEach(function(r){
+        var item = document.createElement('div'); item.className='recent-item';
+        item.innerHTML = '<span class="rtype">'+RESULT_NAMES[r.type]+'</span>' +
+          '<span class="radar" style="color:var(--muted)">雷达:'+(r.radar||'-')+'</span>' +
+          '<span class="rtime">'+(r.time||'')+'</span>';
+        rl.appendChild(item);
+      });
+    }
+  }).catch(function(){});
+}
+
+function getPwd(){ return document.getElementById('pwd-input').value; }
+
+document.getElementById('btn-refresh-keys').addEventListener('click', loadKeys);
+document.getElementById('btn-refresh-stats').addEventListener('click', loadStats);
+
+/* 初始化 */
+(function(){
+  if(sessionStorage.getItem('fp_admin')==='1'){
+    showData();
+    // 需要密码才能调函数，但 sessionStorage 只存了标记，重新加载后密码框空了
+    // 直接回登录页重新输入更稳妥
+    sessionStorage.removeItem('fp_admin');
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>
